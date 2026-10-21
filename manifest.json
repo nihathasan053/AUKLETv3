@@ -1,0 +1,21 @@
+{
+  "name": "AUKLET Live Scores",
+  "short_name": "AUKLET",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#08090b",
+  "theme_color": "#08090b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/08090b/00e676.png?text=AUKLET",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.co/512x512/08090b/00e676.png?text=AUKLET",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
