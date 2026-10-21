@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AUKLET — Premium Live Sports</title>
+  <title>AUKLET — Live Sports Scores</title>
   <meta name="theme-color" content="#08090b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS & Vue 3 via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Vue 3 CDN (Composition API) -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <!-- Google Fonts: Space Grotesk -->
+
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -30,7 +30,7 @@
               border: '#232936',
               accent: '#00e676',
               accentHover: '#00c853',
-              accentGlow: 'rgba(0, 230, 118, 0.18)',
+              accentGlow: 'rgba(0, 230, 118, 0.20)',
               muted: '#717d96'
             }
           },
@@ -44,7 +44,6 @@
   </script>
 
   <style>
-    /* Custom Mobile App Tuning */
     body {
       background-color: #08090b;
       color: #e2e8f0;
@@ -52,34 +51,26 @@
       user-select: none;
       font-family: 'Space Grotesk', sans-serif;
     }
-    .custom-scroll::-webkit-scrollbar {
-      display: none;
-    }
-    .custom-scroll {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .glow-emerald {
-      box-shadow: 0 0 16px rgba(0, 230, 118, 0.22);
-    }
+    .custom-scroll::-webkit-scrollbar { display: none; }
+    .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .glow-emerald { box-shadow: 0 0 16px rgba(0, 230, 118, 0.22); }
     .pulse-live {
       animation: livePulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
     @keyframes livePulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.15); }
+      50% { opacity: 0.35; transform: scale(1.15); }
     }
   </style>
 </head>
-<body class="bg-brand-black text-slate-100 flex justify-center min-h-screen">
+<body class="bg-brand-black flex justify-center min-h-screen">
 
   <div id="app" class="w-full max-w-md bg-brand-black flex flex-col min-h-screen relative border-x border-brand-border/40 pb-20 shadow-2xl">
-    
-    <!-- TOP APP BAR -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/70 px-4 py-3 flex items-center justify-between">
-      <!-- Brand Logo & Wordmark -->
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-40 bg-brand-black/95 backdrop-blur-md border-b border-brand-border/70 px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-2.5 cursor-pointer" @click="currentView = 'home'">
-        <!-- Custom Flying Auklet Bird SVG -->
+        <!-- Auklet Flying Bird Logo -->
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-accent/20 to-brand-border border border-brand-accent/40 flex items-center justify-center p-1 glow-emerald">
           <svg viewBox="0 0 40 40" class="w-full h-full fill-brand-accent">
             <path d="M6 24 C14 20, 22 10, 34 6 C32 14, 28 22, 18 28 C22 25, 27 22, 33 21 C23 29, 15 33, 8 34 C12 30, 15 28, 16 26 C12 26, 8 26, 6 24 Z" />
@@ -92,258 +83,250 @@
         </div>
       </div>
 
-      <!-- Action Icons: Search, Refresh, Live Mode Switcher -->
       <div class="flex items-center space-x-2">
+        <!-- Search icon button -->
         <button @click="currentView = 'search'" class="p-2 rounded-full bg-brand-surface hover:bg-brand-border border border-brand-border text-slate-300">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </button>
 
-        <div class="flex items-center space-x-1.5 px-2 py-1 rounded-full bg-brand-surface border border-brand-border">
-          <span class="w-2 h-2 rounded-full bg-brand-accent pulse-live"></span>
-          <span class="text-[10px] font-mono font-bold tracking-tight text-slate-200">
-            {{ isLiveOnly ? 'LIVE ONLY' : 'ALL' }}
-          </span>
-          <button @click="isLiveOnly = !isLiveOnly" class="text-xs text-brand-accent font-bold px-1 focus:outline-none">
-            {{ isLiveOnly ? '✓' : '○' }}
-          </button>
-        </div>
+        <!-- Live-Only Toggle Pill -->
+        <button @click="toggleLiveOnly()" :class="isLiveOnly ? 'bg-brand-accent text-black border-brand-accent' : 'bg-brand-surface text-slate-300 border-brand-border'" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold">
+          <span class="w-2 h-2 rounded-full" :class="isLiveOnly ? 'bg-black pulse-live' : 'bg-brand-accent pulse-live'"></span>
+          <span>LIVE</span>
+        </button>
       </div>
     </header>
 
-    <!-- SPORTS SELECTOR (12 Sports Architecture) -->
-    <div class="bg-brand-surface/70 border-b border-brand-border/60 py-2.5 px-3 custom-scroll overflow-x-auto flex space-x-2 sticky top-[57px] z-30 backdrop-blur-sm">
+    <!-- SPORTS HORIZONTAL SELECTOR (12-Sport Unified Architecture) -->
+    <div class="bg-brand-surface/80 border-b border-brand-border/60 py-2 px-3 custom-scroll overflow-x-auto flex space-x-2 sticky top-[57px] z-30 backdrop-blur-md">
       <button 
         v-for="sport in sportsList" 
         :key="sport.id"
-        @click="selectedSport = sport.id"
-        :class="selectedSport === sport.id ? 'bg-brand-accent text-black font-extrabold shadow-sm glow-emerald' : 'bg-brand-card text-slate-300 border border-brand-border/70 hover:border-slate-500'"
+        @click="selectSport(sport.id)"
+        :class="selectedSport === sport.id ? 'bg-brand-accent text-black font-extrabold glow-emerald' : 'bg-brand-card text-slate-300 border border-brand-border/70 hover:border-slate-500'"
         class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs transition-all whitespace-nowrap">
         <span>{{ sport.icon }}</span>
         <span>{{ sport.name }}</span>
-        <span v-if="sport.count" class="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono">{{ sport.count }}</span>
+        <span v-if="sport.liveCount > 0" class="text-[9px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono font-bold">{{ sport.liveCount }}</span>
       </button>
     </div>
 
     <!-- MAIN VIEW CONTAINER -->
     <main class="flex-1 p-3.5 space-y-4">
 
-      <!-- VIEW: HOME / ALL MATCHES -->
-      <div v-if="currentView === 'home'" class="space-y-4">
+      <!-- VIEW 1: HOME (MATCHES FEED) -->
+      <div v-if="currentView === 'home'" class="space-y-3.5">
         
-        <!-- Quick Status Filter (Live, Upcoming, Finished) -->
+        <!-- Status Filter Tabs -->
         <div class="flex justify-between items-center bg-brand-surface p-1 rounded-xl border border-brand-border text-xs">
           <button 
             v-for="tab in ['ALL', 'LIVE', 'UPCOMING', 'FINISHED']" 
             :key="tab"
             @click="filterStatus = tab"
-            :class="filterStatus === tab ? 'bg-brand-card text-brand-accent font-bold shadow-inner border border-brand-border/70' : 'text-slate-400 hover:text-slate-200'"
+            :class="filterStatus === tab ? 'bg-brand-card text-brand-accent font-bold border border-brand-border/70' : 'text-slate-400 hover:text-slate-200'"
             class="flex-1 py-1.5 rounded-lg text-center font-mono text-[11px] transition-all">
             {{ tab }}
           </button>
         </div>
 
-        <!-- Selected League Section Header -->
-        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between text-xs px-1 text-slate-400">
           <span class="font-mono tracking-wider font-semibold uppercase text-brand-accent flex items-center space-x-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-brand-accent"></span>
             <span>{{ selectedSport.toUpperCase() }} FIXTURES</span>
           </span>
-          <span class="text-[11px] font-mono text-slate-500">{{ filteredMatches.length }} MATCHES</span>
+          <span class="text-[11px] font-mono text-slate-500">{{ filteredMatches.length }} AVAILABLE</span>
         </div>
 
-        <!-- Matches Listing -->
+        <!-- Match Cards Listing -->
         <div v-if="filteredMatches.length > 0" class="space-y-3">
           <div 
             v-for="match in filteredMatches" 
-            :key="match.id" 
+            :key="match.id"
             @click="openMatchDetails(match)"
-            class="bg-brand-card hover:bg-brand-surface rounded-2xl p-3.5 border border-brand-border/80 transition-all cursor-pointer relative overflow-hidden active:scale-[0.98]">
+            class="bg-brand-card hover:bg-brand-surface rounded-2xl p-3.5 border border-brand-border/80 transition-all cursor-pointer relative overflow-hidden active:scale-[0.99]">
             
-            <!-- Live Indicator Bar -->
+            <!-- Live Indicator Line -->
             <div v-if="match.status === 'LIVE'" class="absolute left-0 top-0 bottom-0 w-1 bg-brand-accent glow-emerald"></div>
 
-            <!-- League & Time Badge -->
+            <!-- Top League Header -->
             <div class="flex items-center justify-between text-[11px] mb-2.5 pb-2 border-b border-brand-border/50 text-slate-400">
               <div class="flex items-center space-x-2">
                 <span class="font-bold text-slate-200">{{ match.tournament }}</span>
                 <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-border/60 font-mono text-slate-300">{{ match.stage }}</span>
               </div>
-              <div class="flex items-center space-x-1.5 font-mono">
+              <div class="font-mono">
                 <span v-if="match.status === 'LIVE'" class="text-brand-accent font-bold flex items-center space-x-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-brand-accent pulse-live"></span>
                   <span>{{ match.liveTime }}</span>
                 </span>
                 <span v-else-if="match.status === 'UPCOMING'" class="text-slate-400">{{ match.startTime }}</span>
-                <span v-else class="text-slate-500 font-bold uppercase">FT</span>
+                <span v-else class="text-slate-500 font-bold">FINISHED</span>
               </div>
             </div>
 
-            <!-- Scoreboard Grid: Football / Generic -->
+            <!-- Football Match View -->
             <div v-if="match.sport === 'football'" class="space-y-2">
-              <!-- Home Team -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2.5">
-                  <img :src="match.homeLogo" class="w-6 h-6 object-contain rounded-full bg-brand-surface p-0.5 border border-brand-border" onerror="this.src='https://placehold.co/40x40/1e293b/fff?text=T'">
-                  <span class="font-semibold text-sm" :class="{'text-white': match.homeScore >= match.awayScore}">{{ match.homeTeam }}</span>
+                  <img :src="match.homeLogo" class="w-6 h-6 object-contain rounded-full bg-brand-surface p-0.5 border border-brand-border" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=H'">
+                  <span class="font-semibold text-sm text-slate-100">{{ match.homeTeam }}</span>
                 </div>
                 <span class="text-base font-bold font-mono px-2" :class="match.status === 'LIVE' ? 'text-brand-accent' : 'text-white'">{{ match.homeScore }}</span>
               </div>
-              <!-- Away Team -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2.5">
-                  <img :src="match.awayLogo" class="w-6 h-6 object-contain rounded-full bg-brand-surface p-0.5 border border-brand-border" onerror="this.src='https://placehold.co/40x40/1e293b/fff?text=T'">
-                  <span class="font-semibold text-sm" :class="{'text-white': match.awayScore >= match.homeScore}">{{ match.awayTeam }}</span>
+                  <img :src="match.awayLogo" class="w-6 h-6 object-contain rounded-full bg-brand-surface p-0.5 border border-brand-border" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=A'">
+                  <span class="font-semibold text-sm text-slate-100">{{ match.awayTeam }}</span>
                 </div>
                 <span class="text-base font-bold font-mono px-2" :class="match.status === 'LIVE' ? 'text-brand-accent' : 'text-white'">{{ match.awayScore }}</span>
               </div>
-              <!-- Football Highlights Tag -->
-              <div v-if="match.recentEvent" class="text-[10px] font-mono text-brand-accent bg-brand-accentGlow/60 px-2 py-1 rounded-md mt-1.5 flex items-center space-x-1">
+              <div v-if="match.recentEvent" class="text-[10px] font-mono text-brand-accent bg-brand-accentGlow px-2 py-1 rounded-md mt-1.5 flex items-center space-x-1">
                 <span>⚽</span>
                 <span>{{ match.recentEvent }}</span>
               </div>
             </div>
 
-            <!-- Scoreboard Grid: Cricket Special View -->
+            <!-- Cricket Match View -->
             <div v-else-if="match.sport === 'cricket'" class="space-y-2 font-mono">
               <div class="flex items-center justify-between text-xs">
                 <div class="flex items-center space-x-2 font-sans font-bold">
-                  <img :src="match.homeLogo" class="w-5 h-5 rounded-full border border-brand-border">
-                  <span>{{ match.homeTeam }}</span>
+                  <img :src="match.homeLogo" class="w-5 h-5 rounded-full border border-brand-border" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=C'">
+                  <span class="text-slate-100">{{ match.homeTeam }}</span>
                 </div>
                 <div class="text-right">
                   <span class="font-bold text-white">{{ match.cricketScore.team1.runs }}/{{ match.cricketScore.team1.wickets }}</span>
-                  <span class="text-[10px] text-slate-400 ml-1">({{ match.cricketScore.team1.overs }} ov)</span>
+                  <span class="text-[10px] text-slate-400 ml-1 font-sans">({{ match.cricketScore.team1.overs }} ov)</span>
                 </div>
               </div>
               <div class="flex items-center justify-between text-xs">
                 <div class="flex items-center space-x-2 font-sans font-bold">
-                  <img :src="match.awayLogo" class="w-5 h-5 rounded-full border border-brand-border">
-                  <span>{{ match.awayTeam }}</span>
+                  <img :src="match.awayLogo" class="w-5 h-5 rounded-full border border-brand-border" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=C'">
+                  <span class="text-slate-100">{{ match.awayTeam }}</span>
                 </div>
                 <div class="text-right">
                   <span class="font-bold text-white">{{ match.cricketScore.team2.runs }}/{{ match.cricketScore.team2.wickets }}</span>
-                  <span class="text-[10px] text-slate-400 ml-1">({{ match.cricketScore.team2.overs }} ov)</span>
+                  <span class="text-[10px] text-slate-400 ml-1 font-sans">({{ match.cricketScore.team2.overs }} ov)</span>
                 </div>
               </div>
-              <!-- Cricket summary message -->
-              <div class="text-[10px] text-amber-300 font-sans mt-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              <div class="text-[10px] text-amber-300 font-sans mt-1 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
                 {{ match.cricketSummary }}
               </div>
             </div>
 
-            <!-- Card Bottom Bar: Favorite toggle & Details CTA -->
+            <!-- Generic Multi-Sport View (Basketball, Tennis, F1, etc.) -->
+            <div v-else class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">{{ match.homeTeam }}</span>
+                <span class="font-mono font-bold text-base">{{ match.homeScore }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-sm">{{ match.awayTeam }}</span>
+                <span class="font-mono font-bold text-base">{{ match.awayScore }}</span>
+              </div>
+            </div>
+
+            <!-- Card Bottom Action Bar -->
             <div class="flex items-center justify-between mt-3 pt-2 border-t border-brand-border/40 text-[10px] text-slate-400 font-mono">
               <button @click.stop="toggleFavorite(match.id)" class="flex items-center space-x-1 hover:text-brand-accent">
-                <svg :class="isFavorite(match.id) ? 'fill-brand-accent text-brand-accent' : 'fill-none stroke-current'" class="w-3.5 h-3.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                <span>{{ isFavorite(match.id) ? 'SAVED' : 'PIN' }}</span>
+                <span :class="isFavorite(match.id) ? 'text-brand-accent font-bold' : 'text-slate-400'">
+                  {{ isFavorite(match.id) ? '★ PINNED' : '☆ PIN MATCH' }}
+                </span>
               </button>
-              <span class="text-slate-500 hover:text-slate-300">STATS & LINEUPS →</span>
+              <span class="text-slate-400 hover:text-brand-accent font-bold">MATCH DETAILS →</span>
             </div>
+
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else class="text-center py-16 px-4 bg-brand-surface/40 rounded-2xl border border-brand-border/50">
-          <div class="w-12 h-12 mx-auto rounded-full bg-brand-border/50 flex items-center justify-center text-xl mb-3">
-            📡
-          </div>
-          <h3 class="text-sm font-bold text-slate-300">No matches found</h3>
-          <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">There are no matches scheduled matching your active sport and status filter.</p>
+        <div v-else class="text-center py-14 px-4 bg-brand-surface/40 rounded-2xl border border-brand-border/60">
+          <div class="text-2xl mb-2">📡</div>
+          <p class="text-sm font-bold text-slate-300">No matches found</p>
+          <p class="text-xs text-slate-500 mt-1">Try switching sports or clearing the active filter.</p>
           <button @click="resetFilters()" class="mt-4 px-4 py-1.5 text-xs font-mono font-bold bg-brand-accent text-black rounded-lg">
-            RESET FILTERS
+            RESET ALL FILTERS
           </button>
         </div>
+
       </div>
 
-      <!-- VIEW: MATCH DETAILS MODAL / SCREEN -->
-      <div v-if="currentView === 'match_details' && activeMatch" class="space-y-4">
-        <!-- Back Navigation -->
+      <!-- VIEW 2: MATCH DETAILS -->
+      <div v-if="currentView === 'details' && activeMatch" class="space-y-4">
         <div class="flex items-center justify-between">
           <button @click="currentView = 'home'" class="flex items-center space-x-1 text-xs text-brand-accent font-mono font-bold">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            <span>BACK TO SCORES</span>
+            <span>← BACK TO SCORES</span>
           </button>
-          <button @click="toggleFavorite(activeMatch.id)" class="text-xs font-mono flex items-center space-x-1 text-slate-300">
-            <span>{{ isFavorite(activeMatch.id) ? '★ FAVORITED' : '☆ ADD TO FAVORITES' }}</span>
+          <button @click="toggleFavorite(activeMatch.id)" class="text-xs font-mono text-slate-300">
+            {{ isFavorite(activeMatch.id) ? '★ FAVORITED' : '☆ ADD TO FAVORITES' }}
           </button>
         </div>
 
-        <!-- Main Banner Scoreboard Card -->
-        <div class="bg-gradient-to-b from-brand-card to-brand-surface rounded-2xl p-4 border border-brand-border glow-emerald relative overflow-hidden">
+        <!-- Detail Banner Card -->
+        <div class="bg-gradient-to-b from-brand-card to-brand-surface rounded-2xl p-4 border border-brand-border glow-emerald">
           <div class="text-center pb-2 border-b border-brand-border/50">
             <span class="text-[11px] font-mono text-brand-accent uppercase font-bold">{{ activeMatch.tournament }} • {{ activeMatch.stage }}</span>
           </div>
-
-          <!-- Teams & Live Scores -->
           <div class="grid grid-cols-3 items-center py-4 text-center">
-            <!-- Home -->
             <div class="flex flex-col items-center">
-              <img :src="activeMatch.homeLogo" class="w-12 h-12 rounded-full border border-brand-border mb-2">
-              <span class="font-bold text-xs text-slate-100">{{ activeMatch.homeTeam }}</span>
-              <span class="text-[10px] text-slate-500">Home</span>
+              <img :src="activeMatch.homeLogo" class="w-12 h-12 rounded-full border border-brand-border mb-2" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=H'">
+              <span class="font-bold text-xs">{{ activeMatch.homeTeam }}</span>
+              <span class="text-[10px] text-slate-400">Home</span>
             </div>
-
-            <!-- Score & Clock -->
             <div class="flex flex-col items-center font-mono">
-              <div v-if="activeMatch.sport === 'football'" class="text-2xl font-black text-white tracking-wider">
+              <div v-if="activeMatch.sport === 'football'" class="text-2xl font-black text-white">
                 {{ activeMatch.homeScore }} - {{ activeMatch.awayScore }}
               </div>
-              <div v-else-if="activeMatch.sport === 'cricket'" class="text-base font-bold text-brand-accent">
-                LIVE
+              <div v-else-if="activeMatch.sport === 'cricket'" class="text-sm font-bold text-brand-accent">
+                {{ activeMatch.status }}
               </div>
-              <div class="mt-1">
-                <span v-if="activeMatch.status === 'LIVE'" class="px-2 py-0.5 rounded-full text-[10px] bg-brand-accent/20 text-brand-accent border border-brand-accent/40 font-bold">
-                  {{ activeMatch.liveTime }}
-                </span>
-                <span v-else class="text-xs text-slate-400 font-bold uppercase">{{ activeMatch.status }}</span>
-              </div>
+              <span class="mt-1 px-2 py-0.5 rounded-full text-[10px] bg-brand-accent/20 text-brand-accent border border-brand-accent/40 font-bold">
+                {{ activeMatch.liveTime || activeMatch.status }}
+              </span>
             </div>
-
-            <!-- Away -->
             <div class="flex flex-col items-center">
-              <img :src="activeMatch.awayLogo" class="w-12 h-12 rounded-full border border-brand-border mb-2">
-              <span class="font-bold text-xs text-slate-100">{{ activeMatch.awayTeam }}</span>
-              <span class="text-[10px] text-slate-500">Away</span>
+              <img :src="activeMatch.awayLogo" class="w-12 h-12 rounded-full border border-brand-border mb-2" onerror="this.src='https://placehold.co/40x40/161a22/00e676?text=A'">
+              <span class="font-bold text-xs">{{ activeMatch.awayTeam }}</span>
+              <span class="text-[10px] text-slate-400">Away</span>
             </div>
           </div>
         </div>
 
-        <!-- Details Tab Controls -->
+        <!-- Detail Sub-Navigation Tabs -->
         <div class="flex border-b border-brand-border text-xs font-mono">
           <button 
-            v-for="subTab in ['TIMELINE', 'STATS', 'LINEUPS', 'INFO']" 
-            :key="subTab"
-            @click="activeDetailTab = subTab"
-            :class="activeDetailTab === subTab ? 'border-b-2 border-brand-accent text-brand-accent font-bold' : 'text-slate-400'"
+            v-for="sub in ['TIMELINE', 'STATS', 'LINEUPS', 'VENUE']" 
+            :key="sub"
+            @click="activeDetailTab = sub"
+            :class="activeDetailTab === sub ? 'border-b-2 border-brand-accent text-brand-accent font-bold' : 'text-slate-400'"
             class="flex-1 pb-2 text-center">
-            {{ subTab }}
+            {{ sub }}
           </button>
         </div>
 
-        <!-- SUBTAB: TIMELINE -->
-        <div v-if="activeDetailTab === 'TIMELINE'" class="space-y-3 font-mono text-xs">
-          <div v-if="activeMatch.events && activeMatch.events.length" class="space-y-2">
-            <div v-for="(ev, idx) in activeMatch.events" :key="idx" class="flex items-center space-x-3 bg-brand-card p-2.5 rounded-xl border border-brand-border/60">
-              <span class="text-brand-accent font-bold w-8 text-right">{{ ev.time }}'</span>
-              <span class="text-base">{{ ev.type === 'goal' ? '⚽' : ev.type === 'card' ? '🟨' : '🔄' }}</span>
+        <!-- Detail Sub-view: Timeline -->
+        <div v-if="activeDetailTab === 'TIMELINE'" class="space-y-2 font-mono text-xs">
+          <div v-if="activeMatch.events && activeMatch.events.length > 0" class="space-y-2">
+            <div v-for="(ev, idx) in activeMatch.events" :key="idx" class="flex items-center space-x-3 bg-brand-card p-2.5 rounded-xl border border-brand-border">
+              <span class="text-brand-accent font-bold w-7 text-right">{{ ev.time }}'</span>
+              <span class="text-sm">{{ ev.type === 'goal' ? '⚽' : ev.type === 'card' ? '🟨' : '🔄' }}</span>
               <div class="flex-1">
                 <p class="font-sans font-bold text-slate-100">{{ ev.player }}</p>
                 <p class="text-[10px] text-slate-400">{{ ev.detail }} ({{ ev.team }})</p>
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-8 text-slate-500 text-xs">No match timeline events available yet.</div>
+          <div v-else class="text-center py-8 text-slate-500 text-xs">No recorded events yet for this fixture.</div>
         </div>
 
-        <!-- SUBTAB: STATS -->
+        <!-- Detail Sub-view: Stats -->
         <div v-if="activeDetailTab === 'STATS'" class="space-y-3 font-mono text-xs">
-          <div v-for="st in activeMatch.stats" :key="st.label" class="bg-brand-card p-3 rounded-xl border border-brand-border/70 space-y-1.5">
+          <div v-for="st in activeMatch.stats" :key="st.label" class="bg-brand-card p-3 rounded-xl border border-brand-border space-y-1.5">
             <div class="flex justify-between text-slate-300 font-bold">
               <span>{{ st.home }}</span>
-              <span class="font-sans text-[11px] text-slate-400 uppercase tracking-wider">{{ st.label }}</span>
+              <span class="font-sans text-[11px] text-slate-400 uppercase">{{ st.label }}</span>
               <span>{{ st.away }}</span>
             </div>
-            <!-- Comparative Progress Bar -->
             <div class="w-full bg-brand-border h-1.5 rounded-full overflow-hidden flex">
               <div :style="{ width: st.homePercent + '%' }" class="bg-brand-accent h-full"></div>
               <div :style="{ width: (100 - st.homePercent) + '%' }" class="bg-slate-500 h-full"></div>
@@ -351,207 +334,211 @@
           </div>
         </div>
 
-        <!-- SUBTAB: LINEUPS / ROSTER -->
-        <div v-if="activeDetailTab === 'LINEUPS'" class="space-y-3 text-xs">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-brand-card p-3 rounded-xl border border-brand-border">
-              <h4 class="font-bold text-slate-200 border-b border-brand-border/60 pb-1 mb-2">{{ activeMatch.homeTeam }}</h4>
-              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
-                <li v-for="p in activeMatch.homeLineup" :key="p">{{ p }}</li>
-              </ul>
-            </div>
-            <div class="bg-brand-card p-3 rounded-xl border border-brand-border">
-              <h4 class="font-bold text-slate-200 border-b border-brand-border/60 pb-1 mb-2">{{ activeMatch.awayTeam }}</h4>
-              <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
-                <li v-for="p in activeMatch.awayLineup" :key="p">{{ p }}</li>
-              </ul>
-            </div>
+        <!-- Detail Sub-view: Lineups -->
+        <div v-if="activeDetailTab === 'LINEUPS'" class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-brand-card p-3 rounded-xl border border-brand-border">
+            <p class="font-bold border-b border-brand-border pb-1 mb-2 text-slate-200">{{ activeMatch.homeTeam }}</p>
+            <ul class="space-y-1 font-mono text-[11px] text-slate-300">
+              <li v-for="p in activeMatch.homeLineup" :key="p">{{ p }}</li>
+            </ul>
+          </div>
+          <div class="bg-brand-card p-3 rounded-xl border border-brand-border">
+            <p class="font-bold border-b border-brand-border pb-1 mb-2 text-slate-200">{{ activeMatch.awayTeam }}</p>
+            <ul class="space-y-1 font-mono text-[11px] text-slate-300">
+              <li v-for="p in activeMatch.awayLineup" :key="p">{{ p }}</li>
+            </ul>
           </div>
         </div>
 
-        <!-- SUBTAB: INFO -->
-        <div v-if="activeDetailTab === 'INFO'" class="bg-brand-card p-3.5 rounded-xl border border-brand-border text-xs space-y-2">
+        <!-- Detail Sub-view: Venue -->
+        <div v-if="activeDetailTab === 'VENUE'" class="bg-brand-card p-3.5 rounded-xl border border-brand-border text-xs space-y-2 font-mono">
           <div class="flex justify-between py-1 border-b border-brand-border/50">
-            <span class="text-slate-400">Venue</span>
-            <span class="font-bold text-slate-200">{{ activeMatch.venue || 'Metropolitan Stadium' }}</span>
+            <span class="text-slate-400">Stadium / Venue</span>
+            <span class="font-bold text-slate-200">{{ activeMatch.venue || 'Olympic Stadium' }}</span>
           </div>
           <div class="flex justify-between py-1 border-b border-brand-border/50">
-            <span class="text-slate-400">Referee / Umpires</span>
-            <span class="font-bold text-slate-200">{{ activeMatch.official || 'M. Oliver (ENG)' }}</span>
-          </div>
-          <div class="flex justify-between py-1 border-b border-brand-border/50">
-            <span class="text-slate-400">Sport Category</span>
-            <span class="font-mono text-brand-accent uppercase font-bold">{{ activeMatch.sport }}</span>
+            <span class="text-slate-400">Match Official</span>
+            <span class="font-bold text-slate-200">{{ activeMatch.official || 'Designated Official' }}</span>
           </div>
           <div class="flex justify-between py-1">
-            <span class="text-slate-400">Data Feed</span>
-            <span class="font-mono text-[10px] text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded">{{ dataSourceType }}</span>
+            <span class="text-slate-400">Data Feed Engine</span>
+            <span class="text-brand-accent font-bold">{{ dataSourceType }}</span>
           </div>
         </div>
 
       </div>
 
-      <!-- VIEW: FAVORITES -->
+      <!-- VIEW 3: ALL SPORTS EXPLORER -->
+      <div v-if="currentView === 'sports'" class="space-y-3">
+        <h2 class="text-xs font-mono font-bold text-brand-accent uppercase tracking-wider">ALL SUPPORTED SPORTS</h2>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div 
+            v-for="sport in sportsList" 
+            :key="sport.id"
+            @click="selectSportAndBrowse(sport.id)"
+            class="bg-brand-card p-3 rounded-xl border border-brand-border hover:border-brand-accent transition-all cursor-pointer flex items-center space-x-3">
+            <span class="text-2xl">{{ sport.icon }}</span>
+            <div>
+              <p class="font-bold text-xs text-slate-200">{{ sport.name }}</p>
+              <span class="text-[10px] font-mono text-slate-400">{{ sport.liveCount }} Live Fixtures</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: FAVORITES -->
       <div v-if="currentView === 'favorites'" class="space-y-3">
-        <h2 class="text-sm font-bold font-mono tracking-wider text-brand-accent uppercase">YOUR PINNED MATCHES</h2>
-        <div v-if="favoriteMatches.length > 0" class="space-y-3">
+        <h2 class="text-xs font-mono font-bold text-brand-accent uppercase tracking-wider">YOUR PINNED MATCHES ({{ favoriteMatches.length }})</h2>
+        <div v-if="favoriteMatches.length > 0" class="space-y-2.5">
           <div 
             v-for="match in favoriteMatches" 
             :key="match.id"
             @click="openMatchDetails(match)"
-            class="bg-brand-card p-3 rounded-xl border border-brand-accent/40 flex justify-between items-center cursor-pointer">
+            class="bg-brand-card p-3 rounded-xl border border-brand-accent/50 flex justify-between items-center cursor-pointer">
             <div>
               <span class="text-[10px] font-mono text-brand-accent">{{ match.tournament }}</span>
-              <p class="font-bold text-xs">{{ match.homeTeam }} vs {{ match.awayTeam }}</p>
-              <span class="text-[11px] font-mono text-slate-400">{{ match.status === 'LIVE' ? match.liveTime : match.startTime }}</span>
+              <p class="font-bold text-xs text-slate-200">{{ match.homeTeam }} vs {{ match.awayTeam }}</p>
+              <span class="text-[10px] font-mono text-slate-400">{{ match.status }} • {{ match.liveTime || match.startTime }}</span>
             </div>
-            <button @click.stop="toggleFavorite(match.id)" class="text-xs text-rose-400 font-mono px-2 py-1">
-              REMOVE
+            <button @click.stop="toggleFavorite(match.id)" class="text-xs text-rose-400 font-mono font-bold px-2 py-1">
+              UNPIN
             </button>
           </div>
         </div>
-        <div v-else class="text-center py-16 bg-brand-surface rounded-2xl border border-brand-border">
-          <p class="text-xs text-slate-400">No favorite matches saved.</p>
-          <p class="text-[11px] text-slate-500 mt-1">Tap the PIN button on any match card to track it here.</p>
+        <div v-else class="text-center py-16 bg-brand-surface/60 rounded-2xl border border-brand-border">
+          <p class="text-xs text-slate-400 font-bold">No pinned fixtures yet</p>
+          <p class="text-[11px] text-slate-500 mt-1">Tap 'PIN MATCH' on any match card to track it here.</p>
         </div>
       </div>
 
-      <!-- VIEW: SPORTS NEWS -->
+      <!-- VIEW 5: NEWS -->
       <div v-if="currentView === 'news'" class="space-y-3">
-        <h2 class="text-sm font-bold font-mono tracking-wider text-brand-accent uppercase">TOP SPORTS HEADLINES</h2>
+        <h2 class="text-xs font-mono font-bold text-brand-accent uppercase tracking-wider">LATEST SPORTS HEADLINES</h2>
         <div class="space-y-3">
-          <article v-for="n in newsArticles" :key="n.id" class="bg-brand-card p-3.5 rounded-2xl border border-brand-border/80 space-y-2">
+          <article v-for="item in newsArticles" :key="item.id" class="bg-brand-card p-3.5 rounded-2xl border border-brand-border space-y-1.5">
             <div class="flex items-center space-x-2 text-[10px] font-mono text-brand-accent">
-              <span class="px-2 py-0.5 rounded bg-brand-surface border border-brand-border uppercase">{{ n.sport }}</span>
-              <span>{{ n.time }}</span>
+              <span class="px-1.5 py-0.5 rounded bg-brand-surface border border-brand-border">{{ item.sport.toUpperCase() }}</span>
+              <span>{{ item.time }}</span>
             </div>
-            <h3 class="font-bold text-sm text-slate-100">{{ n.title }}</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">{{ n.snippet }}</p>
-            <div class="flex justify-between items-center pt-2 text-[11px] font-mono text-slate-500">
-              <span>Source: {{ n.source }}</span>
-              <span class="text-brand-accent font-bold">2 min read</span>
+            <h3 class="font-bold text-xs text-slate-100">{{ item.title }}</h3>
+            <p class="text-[11px] text-slate-400 leading-relaxed">{{ item.snippet }}</p>
+            <div class="flex justify-between items-center pt-1 text-[10px] font-mono text-slate-500">
+              <span>Source: {{ item.source }}</span>
+              <span class="text-brand-accent">Read full story →</span>
             </div>
           </article>
         </div>
       </div>
 
-      <!-- VIEW: SEARCH -->
+      <!-- VIEW 6: SEARCH -->
       <div v-if="currentView === 'search'" class="space-y-3">
         <div class="relative">
           <input 
             v-model="searchQuery" 
             type="text" 
-            placeholder="Search teams, leagues, tournaments..." 
-            class="w-full bg-brand-card border border-brand-border rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-accent font-mono">
+            placeholder="Search teams, tournaments, leagues..." 
+            class="w-full bg-brand-card border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent font-mono">
           <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2.5 text-xs text-slate-400">✕</button>
         </div>
 
         <div class="space-y-2">
-          <div v-for="match in searchResults" :key="match.id" @click="openMatchDetails(match)" class="p-3 bg-brand-card rounded-xl border border-brand-border text-xs flex justify-between items-center cursor-pointer">
+          <div 
+            v-for="match in searchResults" 
+            :key="match.id" 
+            @click="openMatchDetails(match)" 
+            class="p-3 bg-brand-card rounded-xl border border-brand-border text-xs flex justify-between items-center cursor-pointer">
             <div>
-              <p class="font-bold">{{ match.homeTeam }} vs {{ match.awayTeam }}</p>
+              <p class="font-bold text-slate-200">{{ match.homeTeam }} vs {{ match.awayTeam }}</p>
               <span class="text-[10px] font-mono text-slate-400">{{ match.tournament }} ({{ match.sport }})</span>
             </div>
             <span class="font-mono text-brand-accent font-bold">{{ match.status }}</span>
           </div>
-          <p v-if="searchQuery && searchResults.length === 0" class="text-center text-xs text-slate-500 py-6 font-mono">No results match "{{ searchQuery }}"</p>
+          <p v-if="searchQuery && searchResults.length === 0" class="text-center text-xs text-slate-500 py-8 font-mono">
+            No fixtures match "{{ searchQuery }}"
+          </p>
         </div>
       </div>
 
-      <!-- VIEW: SETTINGS & DATA CONFIGURATION -->
-      <div v-if="currentView === 'settings' || currentView === 'profile'" class="space-y-4 text-xs font-mono">
-        <h2 class="text-sm font-bold tracking-wider text-brand-accent uppercase">DATA FEED & SETTINGS</h2>
-        
-        <div class="bg-brand-card p-3.5 rounded-xl border border-brand-border space-y-3">
+      <!-- VIEW 7: PROFILE & SETTINGS -->
+      <div v-if="currentView === 'profile'" class="space-y-4 text-xs font-mono">
+        <h2 class="text-xs font-mono font-bold text-brand-accent uppercase tracking-wider">APP SETTINGS & API BRIDGES</h2>
+
+        <!-- Data Feed Status Card -->
+        <div class="bg-brand-card p-3.5 rounded-xl border border-brand-border space-y-2.5">
           <div class="flex justify-between items-center">
-            <span class="text-slate-300 font-bold">Data Provider Mode</span>
+            <span class="text-slate-300 font-bold">Active Data Adapter</span>
             <span class="px-2 py-0.5 rounded bg-brand-accent/20 text-brand-accent text-[10px] font-bold">{{ dataSourceType }}</span>
           </div>
           <p class="text-[11px] text-slate-400 font-sans leading-relaxed">
-            AUKLET includes zero-budget verified mock pipelines out of the box, with built-in bridges to real sports data backends (TheSportsDB, Football-Data.org, Cricket Data).
+            AUKLET is configured with a resilient client data engine. You can plug in free API credentials below or use the default simulation engine.
           </p>
 
           <div class="space-y-2 pt-2 border-t border-brand-border/50">
-            <label class="block text-[10px] text-slate-400">CUSTOM API KEY (OPTIONAL)</label>
+            <label class="block text-[10px] text-slate-400 uppercase">Football-Data.org / TheSportsDB API Key</label>
             <input 
-              v-model="customApiKey" 
+              v-model="apiKeyInput" 
               type="password" 
-              placeholder="Enter TheSportsDB or Football-Data Key" 
-              class="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-xs text-white">
-            <button @click="saveApiKey()" class="w-full py-2 bg-brand-accent text-black font-bold rounded-lg text-xs font-sans tracking-wide">
-              APPLY DATA PROVIDER
+              placeholder="Paste free API key here" 
+              class="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-accent">
+            <button @click="saveApiKey()" class="w-full py-2 bg-brand-accent text-black font-bold rounded-lg text-xs font-sans">
+              SAVE & SWITCH TO LIVE REST API
             </button>
           </div>
         </div>
 
-        <!-- System Diagnostic -->
+        <!-- System Diagnostics Card -->
         <div class="bg-brand-card p-3.5 rounded-xl border border-brand-border space-y-2 text-slate-400">
-          <div class="flex justify-between"><span>App Version</span><span class="text-slate-200">v1.2.0-Production</span></div>
-          <div class="flex justify-between"><span>Architecture</span><span class="text-slate-200">12-Sport Unified Engine</span></div>
-          <div class="flex justify-between"><span>Storage Status</span><span class="text-slate-200 font-mono text-brand-accent">Synced (LocalDB)</span></div>
-          <div class="flex justify-between"><span>Auto-Refresh Ticker</span><span class="text-slate-200">Every 15 Seconds</span></div>
+          <div class="flex justify-between"><span>Architecture</span><span class="text-slate-200">12 Sports Engine</span></div>
+          <div class="flex justify-between"><span>Offline Storage</span><span class="text-brand-accent font-bold">Enabled (Indexed/Local)</span></div>
+          <div class="flex justify-between"><span>Poll Interval</span><span class="text-slate-200">15s Live Ticker</span></div>
+          <div class="flex justify-between"><span>Theme</span><span class="text-slate-200">Deep Black & Emerald Glow</span></div>
         </div>
 
         <button @click="resetToFactory()" class="w-full py-2.5 bg-brand-surface border border-rose-500/40 text-rose-400 rounded-xl font-bold font-sans">
-          Clear Cache & Reset Defaults
+          Clear Cache & Reset Storage
         </button>
       </div>
 
     </main>
 
-    <!-- BOTTOM APP NAVIGATION (Fixed Bar) -->
-    <nav class="fixed bottom-0 w-full max-w-md bg-brand-black/95 backdrop-blur-lg border-t border-brand-border/80 z-50 px-4 py-2 flex justify-around items-center">
-      <button 
-        v-for="nav in navItems" 
-        :key="nav.id" 
-        @click="currentView = nav.id"
-        :class="currentView === nav.id ? 'text-brand-accent' : 'text-slate-400 hover:text-slate-200'"
-        class="flex flex-col items-center justify-center space-y-1">
-        <component :is="'svg'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="nav.svgPath" />
-        </component>
-        <span class="text-[9px] font-mono tracking-tight font-bold">{{ nav.label }}</span>
+    <!-- FIXED MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-brand-black/95 backdrop-blur-lg border-t border-brand-border/80 z-50 px-3 py-2 flex justify-around items-center">
+      
+      <!-- Tab 1: Scores (Home) -->
+      <button @click="currentView = 'home'" :class="currentView === 'home' ? 'text-brand-accent' : 'text-slate-400'" class="flex flex-col items-center space-y-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span class="text-[9px] font-mono font-bold">SCORES</span>
       </button>
+
+      <!-- Tab 2: Sports -->
+      <button @click="currentView = 'sports'" :class="currentView === 'sports' ? 'text-brand-accent' : 'text-slate-400'" class="flex flex-col items-center space-y-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <span class="text-[9px] font-mono font-bold">SPORTS</span>
+      </button>
+
+      <!-- Tab 3: Favorites -->
+      <button @click="currentView = 'favorites'" :class="currentView === 'favorites' ? 'text-brand-accent' : 'text-slate-400'" class="flex flex-col items-center space-y-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        <span class="text-[9px] font-mono font-bold">PINNED</span>
+      </button>
+
+      <!-- Tab 4: News -->
+      <button @click="currentView = 'news'" :class="currentView === 'news' ? 'text-brand-accent' : 'text-slate-400'" class="flex flex-col items-center space-y-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <span class="text-[9px] font-mono font-bold">NEWS</span>
+      </button>
+
+      <!-- Tab 5: Profile & Settings -->
+      <button @click="currentView = 'profile'" :class="currentView === 'profile' ? 'text-brand-accent' : 'text-slate-400'" class="flex flex-col items-center space-y-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="text-[9px] font-mono font-bold">CONFIG</span>
+      </button>
+
     </nav>
 
   </div>
 
-  <!-- APPLICATION CONTROLLER & REACTIVE ENGINE -->
-  <script>
-    const { createApp, ref, computed, onMounted } = Vue;
-
-    createApp({
-      setup() {
-        // Active View Navigation State
-        const currentView = ref('home');
-        const activeDetailTab = ref('TIMELINE');
-        const selectedSport = ref('football');
-        const filterStatus = ref('ALL');
-        const isLiveOnly = ref(false);
-        const searchQuery = ref('');
-        const activeMatch = ref(null);
-        const dataSourceType = ref('DEMO REALISTIC SIM');
-        const customApiKey = ref(localStorage.getItem('auklet_api_key') || '');
-        const favorites = ref(JSON.parse(localStorage.getItem('auklet_favorites') || '[]'));
-
-        // 12 Sport Supported Architecture
-        const sportsList = ref([
-          { id: 'football', name: 'Football', icon: '⚽', count: 4 },
-          { id: 'cricket', name: 'Cricket', icon: '🏏', count: 3 },
-          { id: 'basketball', name: 'Basketball', icon: '🏀', count: 2 },
-          { id: 'tennis', name: 'Tennis', icon: '🎾', count: 2 },
-          { id: 'badminton', name: 'Badminton', icon: '🏸', count: 0 },
-          { id: 'volleyball', name: 'Volleyball', icon: '🏐', count: 0 },
-          { id: 'rugby', name: 'Rugby', icon: '🏉', count: 0 },
-          { id: 'baseball', name: 'Baseball', icon: '⚾', count: 0 },
-          { id: 'icehockey', name: 'Ice Hockey', icon: '🏒', count: 0 },
-          { id: 'americanfootball', name: 'NFL', icon: '🏈', count: 0 },
-          { id: 'tabletennis', name: 'Table Tennis', icon: '🏓', count: 0 },
-          { id: 'formula1', name: 'F1', icon: '🏎️', count: 1 }
-        ]);
-
-        // Bottom Navigation Bar Items
-        const navItems = [
-          { id: 'home', label: 'SCORES', svgPath: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-          { id: 'favorites', label: 'FAVORITES', svgPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
-          { id: 'news', label: 'NEWS', svgPath: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 
+  <!-- Load Vue Application Engine -->
+  <script src="app.js"></script>
+</body>
+</html>
