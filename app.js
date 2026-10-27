@@ -302,57 +302,95 @@ createApp({
       }
     }
 
-    // Live Score Ticker Simulator (Runs every 10 seconds to advance match clock/stats safely)
+// REAL LIVE DATA — SportScore API
     let tickerInterval = null;
+    let refreshInProgress = false;
+
+    async function refreshLiveMatches() {
+      if (refreshInProgress) return;
+      refreshInProgress = true;
+
+      try {
+        const response = await fetch(
+          'https://sportscore.com/api/widget/matches/?sport=football&limit=50'
+        );
+
+        if (!response.ok) {
+          throw new Error('Sports API HTTP ' + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data.matches)) {
+          throw new Error('Unexpected API response');
+        }
+
+        const realMatches = data.matches.map((m, index) => {
+          const rawStatus = String(m.status || '').toLowerCase();
+
+          let status = 'UPCOMING';
+          if (rawStatus.includes('live') ||
+              rawStatus.includes('progress')) {
+            status = 'LIVE';
+          } else if (rawStatus.includes('finish') ||
+                     rawStatus.includes('ended')) {
+            status = 'FINISHED';
+          }
+
+          return {
+            id: m.slug || ('api-' + index),
+            sport: 'football',
+            tournament: m.competition || 'Football',
+            stage: m.status_text || status,
+            status,
+            liveTime: m.status_text || '',
+            startTime: m.time
+              ? new Date(m.time).toLocaleString()
+              : 'Time unavailable',
+            homeTeam: m.home || 'Home',
+            homeLogo: m.home_logo || '',
+            homeScore: m.home_score ?? '-',
+            awayTeam: m.away || 'Away',
+            awayLogo: m.away_logo || '',
+            awayScore: m.away_score ?? '-',
+            recentEvent: '',
+            venue: '',
+            official: '',
+            events: [],
+            stats: [],
+            homeLineup: [],
+            awayLineup: []
+          };
+        });
+
+        // Never replace working data with an empty response.
+        if (realMatches.length > 0) {
+          matches.value = realMatches;
+          dataSourceType.value = 'SPORTS API';
+          sportsList.value = sportsList.value.map(s => ({
+            ...s,
+            liveCount: s.id === 'football'
+              ? realMatches.filter(m => m.status === 'LIVE').length
+              : 0
+          }));
+        }
+      } catch (error) {
+        console.error('Live sports API error:', error);
+        dataSourceType.value = 'API CONNECTION ERROR';
+      } finally {
+        refreshInProgress = false;
+      }
+    }
 
     onMounted(() => {
-      // Register service worker if supported
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {
-          // SW registration optional for local file opening
-        });
+        navigator.serviceWorker.register('sw.js').catch(() => {});
       }
 
-      tickerInterval = setInterval(() => {
-        // Minor clock increment on live football match
-        const liveMatch = matches.value.find(m => m.id === 'f-101' && m.status === 'LIVE');
-        if (liveMatch) {
-          const currentMin = parseInt(liveMatch.liveTime.replace("'", "")) || 73;
-          if (currentMin < 90) {
-            liveMatch.liveTime = (currentMin + 1) + "'";
-          }
-        }
-      }, 10000);
+      refreshLiveMatches();
+      tickerInterval = setInterval(refreshLiveMatches, 60000);
     });
 
     onUnmounted(() => {
       if (tickerInterval) clearInterval(tickerInterval);
-    });
-
-    return {
-      currentView,
-      selectedSport,
-      filterStatus,
-      isLiveOnly,
-      searchQuery,
-      activeMatch,
-      activeDetailTab,
-      apiKeyInput,
-      dataSourceType,
-      sportsList,
-      filteredMatches,
-      searchResults,
-      favoriteMatches,
-      newsArticles,
-      selectSport,
-      selectSportAndBrowse,
-      toggleLiveOnly,
-      resetFilters,
-      openMatchDetails,
-      isFavorite,
-      toggleFavorite,
-      saveApiKey,
-      resetToFactory
-    };
-  }
-}).mount('#app');
+    });   
